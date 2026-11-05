@@ -105,7 +105,7 @@ docker compose run --rm -e KEYBOARD=crkbd/rev4_1/standard -e KEYMAP=vial_layers 
 
 Edit firmware on the host (e.g. Windows Neovim on this repo). Rebuild with `docker compose run --rm qmk`.
 
-First Docker compile over a Dropbox/synced path can be slow; later builds reuse object files in the mounted `vial-qmk/.build`.
+Object files build under `/tmp/qmk-build` inside the container (avoids Dropbox locking `.build` on the host). Cold compiles are slower; the UF2 is still copied to `./out/`.
 
 ---
 
