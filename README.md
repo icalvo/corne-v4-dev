@@ -8,15 +8,15 @@ Dev kit for a **foostan Corne v4.1 standard (3×6)** with custom Vial firmware (
 | Build | Docker (`Dockerfile` + `docker-compose.yml`) mounting that submodule |
 | Rollback / flash assets | UF2s, flash dumps, `.vil`, `tools/` (picotool, Zadig) |
 
-Layer colors:
+**8 Vial layers** (`DYNAMIC_KEYMAP_LAYER_COUNT 8`). Layer colors:
 
 | Layer | Behavior |
 |-------|----------|
 | 0 Base | Vial Lighting (global EEPROM via Vial app) |
-| 1–4 | Solid HSV from **user EEPROM** (defaults: green / orange / white / blue) |
+| 1–7 | Solid HSV from **user EEPROM** (defaults: green / orange / white / blue / cyan / magenta / yellow) |
 | other | Purple (fixed) |
 
-Change layers 1–4 **without reflashing** with `tools/layer_rgb_tool.py` (close Vial first):
+Change layers 1–7 **without reflashing** with `tools/layer_rgb_tool.py` (close Vial first):
 
 ```powershell
 pip install -r tools/requirements-layer-rgb.txt
@@ -176,12 +176,12 @@ Firmware stores HSV for layers **1–4** in the QMK user EEPROM datablock. Layer
 
 | Command | Effect |
 |---------|--------|
-| `list` / `get N` | Read current RAM colors |
+| `list` / `get N` | Read current RAM colors (layers 1–7) |
 | `set N H S V` | Change color immediately (RAM) |
 | `set … --save` / `save` | Persist to EEPROM |
 | `load` | Reload EEPROM → RAM |
 
-Requires the custom `vial_layers` UF2 (HID command `0xFC`). Close the Vial app before running the tool.
+Requires the custom `vial_layers` UF2 (HID command `0xFC`). Close the Vial app before running the tool. First flash of this EEPROM layout resets layer colors to defaults (config version bump).
 
 ---
 

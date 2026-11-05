@@ -4,7 +4,7 @@
 Protocol (32-byte report, Windows often prefixes report ID 0x00 on write):
   [0]=0xFC
   [1]=subcmd  01=get 02=set 03=save 04=load
-  [2]=layer (1-4 for get/set)
+  [2]=layer (1-7 for get/set)
   [3]=h  [4]=s  [5]=v  (set only)
 
 Close Vial before running — it holds the raw HID interface.
@@ -14,7 +14,7 @@ Examples:
   python tools/layer_rgb_tool.py get 2
   python tools/layer_rgb_tool.py set 2 20 255 180
   python tools/layer_rgb_tool.py save
-  python tools/layer_rgb_tool.py set 4 170 255 255 --save
+  python tools/layer_rgb_tool.py set 7 43 255 255 --save
 """
 
 from __future__ import annotations
@@ -40,11 +40,17 @@ SUB_SET = 0x02
 SUB_SAVE = 0x03
 SUB_LOAD = 0x04
 
+LAYER_FIRST = 1
+LAYER_LAST = 7
+
 LAYER_DEFAULT_NAMES = {
     1: "Lower",
     2: "Raise",
     3: "Adjust",
     4: "Layer4",
+    5: "Layer5",
+    6: "Layer6",
+    7: "Layer7",
 }
 
 
@@ -120,15 +126,16 @@ def cmd_load(dev: hid.device) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    layers = range(LAYER_FIRST, LAYER_LAST + 1)
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="action", required=True)
 
-    sub.add_parser("list", help="Show HSV for layers 1-4")
+    sub.add_parser("list", help=f"Show HSV for layers {LAYER_FIRST}-{LAYER_LAST}")
     g = sub.add_parser("get", help="Get one layer")
-    g.add_argument("layer", type=int, choices=range(1, 5))
+    g.add_argument("layer", type=int, choices=layers)
 
     s = sub.add_parser("set", help="Set one layer HSV (RAM; use --save to persist)")
-    s.add_argument("layer", type=int, choices=range(1, 5))
+    s.add_argument("layer", type=int, choices=layers)
     s.add_argument("h", type=int)
     s.add_argument("s", type=int)
     s.add_argument("v", type=int)
@@ -151,7 +158,7 @@ def main() -> None:
     dev = open_device()
     try:
         if args.action == "list":
-            for layer in range(1, 5):
+            for layer in range(LAYER_FIRST, LAYER_LAST + 1):
                 h, s, v = cmd_get(dev, layer)
                 name = LAYER_DEFAULT_NAMES.get(layer, "")
                 print(f"layer {layer} ({name}): HSV({h}, {s}, {v})")
