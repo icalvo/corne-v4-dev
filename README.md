@@ -42,7 +42,29 @@ git submodule update --init --recursive
 
 ---
 
-## Build with Docker
+## Build + flash from Windows (recommended)
+
+From PowerShell in this repo (Docker Desktop running, submodule initialized once):
+
+```powershell
+.\scripts\build-and-flash.ps1
+```
+
+That script:
+
+1. Compiles via `docker compose run --rm qmk` → `out\crkbd_rev4_1_standard_vial_layers.uf2`
+2. Tells you to enter bootloader on the **left** half (hold **Q** + plug USB) and waits for `RPI-RP2`
+3. Copies the UF2, then repeats for the **right** half (hold **P**)
+4. Prints reassembly steps (TRRS, USB, Vial)
+
+Useful flags:
+
+```powershell
+.\scripts\build-and-flash.ps1 -SkipBuild          # flash existing out\ UF2 only
+.\scripts\build-and-flash.ps1 -TimeoutSec 600     # longer wait for RPI-RP2
+```
+
+## Build with Docker only
 
 Requires Docker Desktop (or equivalent) running.
 
