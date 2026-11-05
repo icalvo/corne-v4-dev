@@ -30,6 +30,29 @@ export PATH="/opt/uv/tools/qmk/bin:${PATH:-}"
 
 cd "$VQ"
 
+# Bind-mounted git submodules often have broken .git gitdir paths inside Docker.
+# QMK generate-version-h then prints git fatals on stdout and Make fails with
+# "multiple target patterns". Wrap git so describe never poisons Make — do NOT
+# delete the host-mounted .git directories.
+mkdir -p /tmp/qmk-bin
+cat > /tmp/qmk-bin/git << 'EOF'
+#!/bin/bash
+real_git=/usr/bin/git
+if [[ ! -x "$real_git" ]]; then
+  real_git=$(command -v -p git 2>/dev/null || true)
+fi
+# First-arg describe (what QMK version generation uses)
+if [[ "${1:-}" == "describe" ]]; then
+  echo "docker-build"
+  exit 0
+fi
+# If the real git cannot run (broken gitdir), fail quietly on stdout
+out="$("$real_git" "$@" 2>/dev/null)" && { printf '%s\n' "$out"; exit 0; }
+exit 0
+EOF
+chmod +x /tmp/qmk-bin/git
+export PATH="/tmp/qmk-bin:/opt/uv/tools/qmk/bin:${PATH}"
+
 cmd="${1:-compile}"
 shift || true
 
@@ -38,8 +61,6 @@ case "$cmd" in
     echo "Compiling -kb $KB -km $KM ..."
     qmk compile -kb "$KB" -km "$KM" "$@"
     mkdir -p "$OUT"
-    uf2=".build/$(echo "${KB}_${KM}" | tr '/' '_').uf2"
-    # QMK names: crkbd_rev4_1_standard_vial_layers.uf2
     built=".build/crkbd_rev4_1_standard_vial_layers.uf2"
     if [[ -f "$built" ]]; then
       cp -f "$built" "$OUT/"
