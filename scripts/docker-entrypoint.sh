@@ -58,16 +58,19 @@ shift || true
 
 case "$cmd" in
   compile)
-    echo "Compiling -kb $KB -km $KM ..."
-    qmk compile -kb "$KB" -km "$KM" "$@"
+    # Keep object files off the host bind mount (Dropbox locks .td→.d renames).
+    BUILD_DIR="${QMK_BUILD_DIR:-/tmp/qmk-build}"
+    mkdir -p "$BUILD_DIR"
+    echo "Compiling -kb $KB -km $KM (BUILD_DIR=$BUILD_DIR) ..."
+    qmk compile -kb "$KB" -km "$KM" -e "BUILD_DIR=$BUILD_DIR" "$@"
     mkdir -p "$OUT"
-    built=".build/crkbd_rev4_1_standard_vial_layers.uf2"
+    built="$BUILD_DIR/crkbd_rev4_1_standard_vial_layers.uf2"
     if [[ -f "$built" ]]; then
       cp -f "$built" "$OUT/"
       echo "Copied $built -> $OUT/"
     else
-      echo "warning: expected UF2 not found at $built; listing .build:" >&2
-      ls -la .build/*.uf2 2>/dev/null || true
+      echo "warning: expected UF2 not found at $built; listing $BUILD_DIR:" >&2
+      ls -la "$BUILD_DIR"/*.uf2 2>/dev/null || true
       exit 1
     fi
     ;;

@@ -1,6 +1,9 @@
 services:
   qmk:
     build: .
+    environment:
+      # Object tree inside the container — avoids Dropbox locking host .build files
+      QMK_BUILD_DIR: /tmp/qmk-build
     volumes:
       # Forked vial-qmk (git submodule) — must be initialized on the host first
       - ./vial-qmk:/workspace/vial-qmk

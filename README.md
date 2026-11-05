@@ -8,20 +8,25 @@ Dev kit for a **foostan Corne v4.1 standard (3×6)** with custom Vial firmware (
 | Build | Docker (`Dockerfile` + `docker-compose.yml`) mounting that submodule |
 | Rollback / flash assets | UF2s, flash dumps, `.vil`, `tools/` (picotool, Zadig) |
 
-Layer colors (firmware; edit in the submodule):
+Layer colors:
 
 | Layer | Behavior |
 |-------|----------|
-| 0 Base | Vial Lighting (`rgb_matrix_reload_from_eeprom`) |
-| 1 Lower | Green |
-| 2 Raise | Orange |
-| 3 Adjust | White |
-| 4 | Blue |
-| other | Purple |
+| 0 Base | Vial Lighting (global EEPROM via Vial app) |
+| 1–4 | Solid HSV from **user EEPROM** (defaults: green / orange / white / blue) |
+| other | Purple (fixed) |
 
-Keymap path in the submodule:
+Change layers 1–4 **without reflashing** with `tools/layer_rgb_tool.py` (close Vial first):
 
-`vial-qmk/keyboards/crkbd/keymaps/vial_layers/`
+```powershell
+pip install -r tools/requirements-layer-rgb.txt
+python tools/layer_rgb_tool.py list
+python tools/layer_rgb_tool.py set 2 20 255 200 --save
+```
+
+Keymap / protocol live in the submodule:
+
+`vial-qmk/keyboards/crkbd/keymaps/vial_layers/` (`layer_rgb.c`, HID cmd `0xFC`)
 
 ---
 
@@ -158,10 +163,25 @@ corne-v4-dev/
   scripts/docker-entrypoint.sh
   vial-qmk/                 # submodule → icalvo/vial-qmk @ vial
   out/                      # gitignored build output
-  tools/                    # picotool, Zadig
+  tools/                    # picotool, Zadig, layer_rgb_tool.py
   *.uf2 / *.bin / *.vil     # rollback and reference firmware
   README.md
 ```
+
+---
+
+## Layer RGB CLI
+
+Firmware stores HSV for layers **1–4** in the QMK user EEPROM datablock. Layer **0** still follows Vial Lighting.
+
+| Command | Effect |
+|---------|--------|
+| `list` / `get N` | Read current RAM colors |
+| `set N H S V` | Change color immediately (RAM) |
+| `set … --save` / `save` | Persist to EEPROM |
+| `load` | Reload EEPROM → RAM |
+
+Requires the custom `vial_layers` UF2 (HID command `0xFC`). Close the Vial app before running the tool.
 
 ---
 
