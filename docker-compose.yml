@@ -1,0 +1,10 @@
+services:
+  qmk:
+    build: .
+    volumes:
+      # Forked vial-qmk (git submodule) — must be initialized on the host first
+      - ./vial-qmk:/workspace/vial-qmk
+      # Built UF2 lands here
+      - ./out:/workspace/out
+    # Override command for a shell: docker compose run --rm qmk shell
+    # Default CMD is "compile"

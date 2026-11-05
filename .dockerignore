@@ -1,0 +1,8 @@
+vial-qmk
+out
+tools
+*.uf2
+*.bin
+*.vil
+.git
+**/.git

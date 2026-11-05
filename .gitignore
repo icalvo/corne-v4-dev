@@ -1,0 +1,10 @@
+# Build output (Docker mounts ./out here)
+out/
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
