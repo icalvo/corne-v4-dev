@@ -74,8 +74,11 @@ docker compose run --rm -e KEYBOARD=crkbd/rev4_1/standard -e KEYMAP=vial_layers 
 - Based on `qmkfm/qmk_cli`
 - `PATH` includes the image’s `qmk` CLI
 - Entrypoint mounts expectations: host `./vial-qmk` → `/workspace/vial-qmk`, `./out` → `/workspace/out`
+- A small `git` wrapper so QMK version generation does not break when submodule `.git` gitdir paths are invalid inside the container (common with Docker Desktop bind mounts)
 
-Edit firmware on the host (e.g. Windows Neovim via the repo path or `\\wsl$\...` if you keep a WSL checkout). Rebuild with `docker compose run --rm qmk`.
+Edit firmware on the host (e.g. Windows Neovim on this repo). Rebuild with `docker compose run --rm qmk`.
+
+First Docker compile over a Dropbox/synced path can be slow; later builds reuse object files in the mounted `vial-qmk/.build`.
 
 ---
 
