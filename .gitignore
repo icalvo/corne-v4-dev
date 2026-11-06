@@ -1,6 +1,10 @@
 # Build output (Docker mounts ./out here)
 out/
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Editor / OS junk
 .DS_Store
 Thumbs.db

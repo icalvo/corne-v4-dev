@@ -59,7 +59,8 @@ shift || true
 case "$cmd" in
   compile)
     # Keep object files off the host bind mount (Dropbox locks .td→.d renames).
-    BUILD_DIR="${QMK_BUILD_DIR:-/tmp/qmk-build}"
+    # Prefer a Docker named volume at /qmk-build so caches survive `run --rm`.
+    BUILD_DIR="${QMK_BUILD_DIR:-/qmk-build}"
     mkdir -p "$BUILD_DIR"
     echo "Compiling -kb $KB -km $KM (BUILD_DIR=$BUILD_DIR) ..."
     qmk compile -kb "$KB" -km "$KM" -e "BUILD_DIR=$BUILD_DIR" "$@"
@@ -73,6 +74,12 @@ case "$cmd" in
       ls -la "$BUILD_DIR"/*.uf2 2>/dev/null || true
       exit 1
     fi
+    ;;
+  clean-build)
+    BUILD_DIR="${QMK_BUILD_DIR:-/qmk-build}"
+    echo "Removing $BUILD_DIR ..."
+    rm -rf "${BUILD_DIR:?}/"*
+    echo "Build cache cleared."
     ;;
   shell)
     exec bash -l

@@ -16,13 +16,14 @@ Dev kit for a **foostan Corne v4.1 standard (3×6)** with custom Vial firmware (
 | 1–7 | Solid HSV from **user EEPROM** (defaults: green / orange / white / blue / cyan / magenta / yellow) |
 | other | Purple (fixed) |
 
-Change layers 1–7 **without reflashing** with `tools/layer_rgb_tool.py` (close Vial first):
+Change layers 1–7 **without reflashing** with the GUI (close Vial first):
 
 ```powershell
 pip install -r tools/requirements-layer-rgb.txt
-python tools/layer_rgb_tool.py list
-python tools/layer_rgb_tool.py set 2 20 255 200 --save
+python tools/layer_rgb_tool.py
 ```
+
+It loads EEPROM colors on start (layer 0 via Vial Lighting EEPROM; 1–7 via user EEPROM). Click a layer swatch, pick a color — the keyboard is updated and saved immediately. Layer 0 picks force **Solid Color** mode (same HSV store Vial uses).
 
 Keymap / protocol live in the submodule:
 
@@ -65,7 +66,7 @@ That script:
 Useful flags:
 
 ```powershell
-.\scripts\build-and-flash.ps1 -SkipBuild          # flash existing out\ UF2 only
+.\scripts\build-and-flash.ps1 -FlashOnly          # flash existing out\ UF2 only (alias: -SkipBuild)
 .\scripts\build-and-flash.ps1 -TimeoutSec 600     # longer wait for RPI-RP2
 ```
 
@@ -105,7 +106,13 @@ docker compose run --rm -e KEYBOARD=crkbd/rev4_1/standard -e KEYMAP=vial_layers 
 
 Edit firmware on the host (e.g. Windows Neovim on this repo). Rebuild with `docker compose run --rm qmk`.
 
-Object files build under `/tmp/qmk-build` inside the container (avoids Dropbox locking `.build` on the host). Cold compiles are slower; the UF2 is still copied to `./out/`.
+Object files live in a **Docker volume** (`qmk-build` → `/qmk-build`), not on the Dropbox bind mount and not in ephemeral `/tmp`. The first compile is still slow (~20+ min over a synced path); later rebuilds are incremental and much faster. Wipe the cache if the build looks stale or corrupt:
+
+```bash
+docker compose run --rm qmk clean-build
+```
+
+If you only need to flash an existing UF2: `.\scripts\build-and-flash.ps1 -FlashOnly`.
 
 ---
 
@@ -170,18 +177,16 @@ corne-v4-dev/
 
 ---
 
-## Layer RGB CLI
+## Layer RGB GUI
 
-Firmware stores HSV for layers **1–4** in the QMK user EEPROM datablock. Layer **0** still follows Vial Lighting.
+Firmware stores HSV for layers **1–7** in the QMK user EEPROM datablock. Layer **0** still follows Vial Lighting.
 
-| Command | Effect |
-|---------|--------|
-| `list` / `get N` | Read current RAM colors (layers 1–7) |
-| `set N H S V` | Change color immediately (RAM) |
-| `set … --save` / `save` | Persist to EEPROM |
-| `load` | Reload EEPROM → RAM |
+`python tools/layer_rgb_tool.py` opens a small Tk GUI: reload from EEPROM, pick swatches (or a custom color). Each pick issues HID SET+SAVE so the change sticks without a separate save step.
 
-Requires the custom `vial_layers` UF2 (HID command `0xFC`). Close the Vial app before running the tool. First flash of this EEPROM layout resets layer colors to defaults (config version bump).
+- **Layer 0:** VIA/VialRGB lighting (`0x07`/`0x08`/`0x09`) — same store as Vial’s Lighting tab; swatch sets Solid Color + HSV
+- **Layers 1–7:** custom HID `0xFC` user EEPROM
+
+Requires the custom `vial_layers` UF2 and `hidapi`. Close the Vial app before running. First flash after an EEPROM layout version bump resets layer 1–7 colors to defaults (layer 0 lighting EEPROM is separate).
 
 ---
 

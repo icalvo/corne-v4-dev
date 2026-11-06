@@ -12,14 +12,26 @@
 .PARAMETER SkipBuild
   Skip Docker compile and flash an existing UF2 in out\ (or -Uf2Path).
 
+.PARAMETER FlashOnly
+  Same as -SkipBuild: flash only, no compile.
+
 .PARAMETER Uf2Path
   Explicit UF2 to flash. Default: <repo>\out\crkbd_rev4_1_standard_vial_layers.uf2
 
 .PARAMETER TimeoutSec
   How long to wait for RPI-RP2 per half (default 300).
+
+.EXAMPLE
+  .\scripts\build-and-flash.ps1
+  Build then flash both halves.
+
+.EXAMPLE
+  .\scripts\build-and-flash.ps1 -FlashOnly
+  Flash the UF2 already in out\ (no Docker build).
 #>
 [CmdletBinding()]
 param(
+    [Alias("FlashOnly")]
     [switch]$SkipBuild,
     [string]$Uf2Path = "",
     [int]$TimeoutSec = 300
@@ -164,7 +176,7 @@ if (-not $SkipBuild) {
         throw "Docker compile failed (exit $LASTEXITCODE)."
     }
 } else {
-    Write-Step "Skipping build (-SkipBuild)"
+    Write-Step "Skipping build (-FlashOnly / -SkipBuild)"
 }
 
 if (-not (Test-Path -LiteralPath $Uf2Path)) {
@@ -194,7 +206,7 @@ Write-WarnBox @(
     "  3. Plug the main half (usually LEFT) into USB."
     "  4. Open Vial — board should appear as Corne v4."
     "  5. If the layout looks wrong: File -> Load from file -> corne-v4-layout-backup.vil"
-    "  6. Check layers: Base = Vial Lighting; Lower green; Raise orange; Adjust white; Layer 4 blue."
+    "  6. Check layers: Base = Vial Lighting; 1-7 = EEPROM colors (green/orange/white/blue/cyan/magenta/yellow)."
 )
 
 Write-Host "Done." -ForegroundColor Green
