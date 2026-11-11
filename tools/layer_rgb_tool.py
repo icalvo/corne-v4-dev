@@ -2,7 +2,7 @@
 """GUI to edit Corne v4 vial_layers per-layer RGB colors over VIA raw HID.
 
 Layer 0 uses VialRGB lighting EEPROM (same protocol as Vial's Lighting tab).
-Layers 1-7 use the custom 0xFC user-EEPROM protocol.
+Layers 1-9 use the custom 0xFC user-EEPROM protocol.
 
 Loads colors on start; picking a swatch writes SET+SAVE immediately.
 
@@ -31,7 +31,7 @@ PID = 0x0004
 USAGE_PAGE = 0xFF60
 REPORT_LEN = 32
 
-# Custom layer-color protocol (layers 1-7)
+# Custom layer-color protocol (layers 1-9)
 CMD = 0xFC
 SUB_GET = 0x01
 SUB_SET = 0x02
@@ -48,7 +48,7 @@ VIALRGB_EFFECT_OFF = 0
 VIALRGB_EFFECT_SOLID_COLOR = 2  # enum: OFF=0, DIRECT=1, SOLID_COLOR=2
 
 LAYER_FIRST = 0
-LAYER_LAST = 7
+LAYER_LAST = 9
 
 LAYER_NAMES = {
     0: "Base (Vial)",
@@ -59,6 +59,8 @@ LAYER_NAMES = {
     5: "Layer 5",
     6: "Layer 6",
     7: "Layer 7",
+    8: "Layer 8",
+    9: "Layer 9",
 }
 
 SWATCHES: list[tuple[str, str]] = [

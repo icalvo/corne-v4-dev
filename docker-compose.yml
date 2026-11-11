@@ -4,6 +4,8 @@ services:
     environment:
       # Object tree on a Docker volume (not Dropbox bind mount, not ephemeral /tmp)
       QMK_BUILD_DIR: /qmk-build
+      # Keep Vial EEPROM across rebuilds (must match util/build_id.py / rules.mk)
+      VIAL_BUILD_ID: "0xC7D845"
     volumes:
       # Forked vial-qmk (git submodule) — must be initialized on the host first
       - ./vial-qmk:/workspace/vial-qmk

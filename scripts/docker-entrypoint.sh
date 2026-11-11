@@ -28,6 +28,16 @@ fi
 
 export PATH="/opt/uv/tools/qmk/bin:${PATH:-}"
 
+# Stable Vial EEPROM magic across rebuilds of this keymap (avoids wipe on every flash).
+# Override with -e VIAL_BUILD_ID=0x...... if you intentionally want a fresh EEPROM.
+if [[ -z "${VIAL_BUILD_ID:-}" && "$KM" == "vial_layers" ]]; then
+  # 24-bit stable id for vial_layers (Vial EEPROM magic); keep fixed across rebuilds.
+  export VIAL_BUILD_ID=0xC7D845
+fi
+if [[ -n "${VIAL_BUILD_ID:-}" ]]; then
+  echo "VIAL_BUILD_ID=$VIAL_BUILD_ID (stable EEPROM magic)"
+fi
+
 cd "$VQ"
 
 # Bind-mounted git submodules often have broken .git gitdir paths inside Docker.
