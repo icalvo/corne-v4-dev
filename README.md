@@ -27,7 +27,21 @@ It loads EEPROM colors on start (layer 0 via Vial Lighting EEPROM; 1–7 via use
 
 Keymap / protocol live in the submodule:
 
-`vial-qmk/keyboards/crkbd/keymaps/vial_layers/` (`layer_rgb.c`, HID cmd `0xFC`)
+`vial-qmk/keyboards/crkbd/keymaps/vial_layers/` (`keymap.c`, `layer_rgb.c`, HID cmd `0xFC`)
+
+### Dual-hold Adjust (layers 5 / 6 / 7)
+
+In addition to the usual QMK Tri Layer keys (`TL_LOWR` / `TL_UPPR` → layers **1** / **2**, both held → **3**), this keymap adds a second trio via `update_tri_layer_state` in `layer_state_set_user`:
+
+| Hold | Result |
+|------|--------|
+| `MO(5)` | Layer 5 |
+| `MO(6)` | Layer 6 |
+| `MO(5)` **and** `MO(6)` | Layers 5 + 6 + **7** (Adjust) |
+
+Assign `MO(5)` and `MO(6)` in Vial on the keys you want to dual-hold; put Adjust bindings on layer **7**. The two trios are independent — `TL_*` still drives 1/2/3 only.
+
+Caveat: the hook turns layer **7** off whenever 5 and 6 are not both on, so `TG(7)` / `TO(7)` alone will not stay active.
 
 ---
 
